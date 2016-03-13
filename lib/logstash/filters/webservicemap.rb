@@ -130,11 +130,19 @@ class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
     extension = get_extension(path)
     temp_extension = '_temp'+extension;
     file_name = Digest::SHA1.hexdigest path
-    File.open(file_name+temp_extension, 'wb') do |saved_file|
-      open(path, 'rb') do |read_file|
-        saved_file.write(read_file.read)
+    begin
+      File.open(file_name+temp_extension, 'wb') do |saved_file|
+        open(path, 'rb') do |read_file|
+          saved_file.write(read_file.read)
+        end
       end
+    rescue Exception => _
+      if registering
+        raise "#{self.class.name}: Failed to initialize with #{file_name} and path #{path}"
+      end
+      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :map_path => file_name, :path => path)
     end
+
     begin
       load_file(registering, extension, file_name+temp_extension)
       FileUtils.mv(file_name+temp_extension, file_name+extension)
