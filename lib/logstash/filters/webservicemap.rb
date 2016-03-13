@@ -113,9 +113,9 @@ class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
   end
 
   def get_extension(path)
-    if path.end_with?('.json')
+    if path.end_with?('json')
       return '.json'
-    elsif path.end_with?('.csv')
+    elsif path.end_with?('csv')
       return '.csv'
     end
     '.yml'
