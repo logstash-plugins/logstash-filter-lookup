@@ -121,7 +121,7 @@ output {
 }
 
 ### 3. Execution example
-Install with bin/plugin install webservicemap
+Install with bin/plugin install logstash-filter-webservicemap
 bin/logstash -f config/myconf.conf --log logstash.log --debug
 
 ### 4. Results
@@ -130,6 +130,11 @@ bin/logstash -f config/myconf.conf --log logstash.log --debug
 #### Output
 {:timestamp=>"2016-03-13T10:41:50.264000+0100", :message=>"output received", :event=>{"message"=>"200", "@version"=>"1", "@timestamp"=>"2016-03-13T09:41:49.493Z", "host"=>"Mac-mini-de-angel.local", "dest"=>"OK"}, :level=>:debug, :file=>"(eval)", :line=>"47", :method=>"output_func"}
 
+### 5. Update
+bin/plugin update logstash-filter-webservicemap
+
+### 6. GEM
+https://rubygems.org/gems/logstash-filter-webservicemap
 
 ## Documentation
 
