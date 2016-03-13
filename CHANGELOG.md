@@ -3,3 +3,6 @@
 
 ## 1.0.2
  - Only updated gemspec description
+
+## 1.0.3
+ - map_url as mandatory to be required.

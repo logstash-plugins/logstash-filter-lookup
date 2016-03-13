@@ -33,8 +33,12 @@ class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
   # value with the new mapping value.
   config :override, :validate => :boolean, :default => false
 
-  # The full URI path of a Web service who generates an yml format response.
-  config :map_url, :validate => :string
+  # The full URI path of a Web service who generates an JSON, yml or CSV format response.
+  # requires to append as suffix the format type. Ex: http://localhost:8080/geoPoints?type=json
+  # http://localhost:8080/geoPoints/json
+  # http://localhost:8080/geoPoints/csv
+  # If no suffix matches, defaults to YAML
+  config :map_url, :validate => :string, :required => true
 
   # When using a map file or url, this setting will indicate how frequently
   # (in seconds) logstash will check the YAML file or url for updates.
