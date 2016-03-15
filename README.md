@@ -11,6 +11,7 @@ It is fully free and fully open source. The license is Apache 2.0, meaning you a
 See examples/webservice/java
 
 ### 2. Logstash config example
+```
 input {
 	stdin{}
 }
@@ -27,17 +28,21 @@ output {
 
 	}
 }
-
+```
 ### 3. Execution example
 Install with bin/plugin install logstash-filter-webservicemap
+```sh
 bin/logstash -f config/myconf.conf --log logstash.log --debug
+```
 
 ### 4. Results
 #### Input
 200
 
 #### Output
+```json
 {:timestamp=>"2016-03-13T10:41:50.264000+0100", :message=>"output received", :event=>{"message"=>"200", "@version"=>"1", "@timestamp"=>"2016-03-13T09:41:49.493Z", "host"=>"Mac-mini-de-angel.local", "dest"=>"OK"}, :level=>:debug, :file=>"(eval)", :line=>"47", :method=>"output_func"}
+```
 
 ### 5. Update
 bin/plugin update logstash-filter-webservicemap
