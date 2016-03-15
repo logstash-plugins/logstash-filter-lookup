@@ -8,103 +8,9 @@ It is fully free and fully open source. The license is Apache 2.0, meaning you a
 
 ## Example
 ### 1. Web Service Example
-#### pom.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>es.nangel.logstash.webservicemap</groupId>
-    <artifactId>test</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.3.3.RELEASE</version>
-    </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-csv</artifactId>
-            <version>2.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-    </dependencies>
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-
-#### Test.java
-package es.nangel.logstash.webservicemap.test;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class Test {
-    public static void main(String[] args) {
-        SpringApplication.run(Test.class, args);
-    }
-}
-
-#### TestController.java
-package es.nangel.logstash.webservicemap.test;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@RestController
-public class TestController {
-
-    @RequestMapping(value = "/json", produces = "application/json")
-    public Map<String, String> getElementJSON() {
-        Map<String, String> toReturn = new HashMap<>();
-        toReturn.put("200", "OK");
-        return toReturn;
-    }
-}
+See examples/webservice/java
 
 ### 2. Logstash config example
-
 input {
 	stdin{}
 }
@@ -129,6 +35,7 @@ bin/logstash -f config/myconf.conf --log logstash.log --debug
 ### 4. Results
 #### Input
 200
+
 #### Output
 {:timestamp=>"2016-03-13T10:41:50.264000+0100", :message=>"output received", :event=>{"message"=>"200", "@version"=>"1", "@timestamp"=>"2016-03-13T09:41:49.493Z", "host"=>"Mac-mini-de-angel.local", "dest"=>"OK"}, :level=>:debug, :file=>"(eval)", :line=>"47", :method=>"output_func"}
 
