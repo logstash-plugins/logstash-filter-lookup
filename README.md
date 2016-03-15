@@ -40,8 +40,22 @@ bin/logstash -f config/myconf.conf --log logstash.log --debug
 200
 
 #### Output
-```json
-{:timestamp=>"2016-03-13T10:41:50.264000+0100", :message=>"output received", :event=>{"message"=>"200", "@version"=>"1", "@timestamp"=>"2016-03-13T09:41:49.493Z", "host"=>"Mac-mini-de-angel.local", "dest"=>"OK"}, :level=>:debug, :file=>"(eval)", :line=>"47", :method=>"output_func"}
+```
+{
+    :timestamp=>"2016-03-13T10:41:50.264000+0100", 
+    :message=>"output received", 
+    :event=>{
+        "message"=>"200", 
+        "@version"=>"1", 
+        "@timestamp"=>"2016-03-13T09:41:49.493Z", 
+        "host"=>"Mac-mini-de-angel.local", 
+        "dest"=>"OK"
+    }, 
+    :level=>:debug, 
+    :file=>"(eval)", 
+    :line=>"47", 
+    :method=>"output_func"
+}
 ```
 
 ### 5. Update
