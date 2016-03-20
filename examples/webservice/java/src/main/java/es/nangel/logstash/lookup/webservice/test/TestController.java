@@ -1,4 +1,4 @@
-package es.nangel.logstash.webservicemap.test;
+package es.nangel.logstash.lookup.webservice.test;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

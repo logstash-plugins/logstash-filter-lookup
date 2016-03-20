@@ -2,6 +2,7 @@ The following is a list of people who have contributed ideas, code, bug
 reports, or in general have helped logstash along its way.
 
 Based on logstash-filter-translate
+Formerly called logstash-filter-webservicemap
 Forked from the pull Request for logstash-filter-translate and separated from there.
 credits to: https://github.com/logstash-plugins/logstash-filter-translate
 the PR that never merged to: https://github.com/logstash-plugins/logstash-filter-translate/pull/7
