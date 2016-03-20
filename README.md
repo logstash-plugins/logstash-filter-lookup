@@ -16,7 +16,7 @@ input {
 	stdin{}
 }
 filter {
-	webservicemap {
+	lookup {
 		field => "message"
 		map_url => "http://localhost:8080/json"
 		destination => "dest"
@@ -30,7 +30,7 @@ output {
 }
 ```
 ### 3. Execution example
-Install with bin/plugin install logstash-filter-webservicemap
+Install with bin/plugin install logstash-filter-lookup
 ```sh
 bin/logstash -f config/myconf.conf --log logstash.log --debug
 ```
@@ -59,10 +59,10 @@ bin/logstash -f config/myconf.conf --log logstash.log --debug
 ```
 
 ### 5. Update
-bin/plugin update logstash-filter-webservicemap
+bin/plugin update logstash-filter-lookup
 
 ### 6. GEM
-https://rubygems.org/gems/logstash-filter-webservicemap
+https://rubygems.org/gems/logstash-filter-lookup
 
 ## Documentation
 

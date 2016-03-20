@@ -14,14 +14,13 @@ require 'csv'
 # matches the EXACT contents of a map entry key, the field's value will be substituted
 # with the matched key's value from the map.
 #
-# By default, the webservicemap filter will replace the contents of the
+# By default, the lookup filter will replace the contents of the
 # maching event field (in-place). However, by using the `destination`
 # configuration item, you may also specify a target event field to
 # populate with the new mapd value.
 
-class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
-  config_name "webservicemap"
-
+class LogStash::Filters::LookUp < LogStash::Filters::Base
+  config_name "lookup"
   # The name of the logstash event field containing the value to be compared for a
   # match by the map filter (e.g. `message`, `host`, `response_code`). 
   # 
@@ -73,6 +72,7 @@ class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
 
   public
   def register
+    warn "[DEPRECATION] This gem has been renamed to logstash-filter-lookup and will no longer be supported. Please switch to logstash-filter-lookup as soon as possible."
     @my_map = {}
     @next_refresh = Time.now + @refresh_interval
     download_ws(@map_url, true)
@@ -181,4 +181,4 @@ class LogStash::Filters::WebServiceMap < LogStash::Filters::Base
       @logger.error('Something went wrong when attempting to map from my_map', :exception => e, :field => @field, :event => event)
     end
   end # def filter
-end # class LogStash::Filters::WebServiceMap
+end # class LogStash::Filters::LookUp

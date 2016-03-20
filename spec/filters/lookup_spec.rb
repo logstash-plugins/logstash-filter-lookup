@@ -1,11 +1,11 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/webservicemap"
+require "logstash/filters/lookup"
 require "webmock/rspec"
 require 'digest/sha1'
 WebMock.disable_net_connect!(allow_localhost: true)
 
-describe LogStash::Filters::WebServiceMap do
+describe LogStash::Filters::LookUp do
 
   let(:config) { Hash.new }
   subject { described_class.new(config) }
@@ -13,7 +13,7 @@ describe LogStash::Filters::WebServiceMap do
   describe "webserver mapping" do
       config <<-CONFIG
       filter {
-          webservicemap {
+          lookup {
               field       => "status"
               destination => "mapping"
               map_url  => "http://dummyurl/"
@@ -46,7 +46,7 @@ describe LogStash::Filters::WebServiceMap do
   describe "webserver mapping existing YML" do
       config <<-CONFIG
       filter {
-          webservicemap {
+          lookup {
               field       => "status"
               destination => "mapping"
               map_url  => "http://dummyurl/"
@@ -84,7 +84,7 @@ describe LogStash::Filters::WebServiceMap do
   describe "webserver mapping not valid" do
       config <<-CONFIG
       filter {
-          webservicemap {
+          lookup {
               field       => "status"
               destination => "mapping"
               map_url  => "http://dummyurl/"
@@ -113,43 +113,7 @@ describe LogStash::Filters::WebServiceMap do
           insist { subject["mapping"] } == nil
       end
   end
-=begin
-  describe "webserver mapping not valid existing YML" do
-      config <<-CONFIG
-      filter {
-          webservicemap {
-              field       => "status"
-              destination => "mapping"
-              map_url  => "http://dummyurl/"
-          }
-      }
-      CONFIG
-    context "init" do
-      let(:my_map) { {"200"=>"OKF"}}
-    end
 
-      RSpec.configure do |config|
-
-        hash = Digest::SHA1.hexdigest 'http://dummyurl/'
-          config.before(:each) do
-              stub_request(:get, "http://dummyurl/").
-              with(:headers => {'Accept'=>'*/*', 'User-Agent'=>'Ruby'}).
-              to_return(:status => 200, :body => "\
-                        '200': OK\n\
-                        '300': Redirect\n\
-                        '400', Client Error\n\
-                        '500': Server Error", :headers => {})
-          end
-          config.after(:all) do
-              FileUtils.rm_rf(hash+'.yml')
-          end
-      end
-
-      sample("status" => "200") do
-          insist { subject["mapping"] } == "OKF"
-      end
-  end
-=end
     context "allow sprintf" do
       let(:config) do
         {

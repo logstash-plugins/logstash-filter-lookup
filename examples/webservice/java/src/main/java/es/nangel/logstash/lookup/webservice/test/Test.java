@@ -1,4 +1,4 @@
-package es.nangel.logstash.webservicemap.test;
+package es.nangel.logstash.lookup.webservice.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
