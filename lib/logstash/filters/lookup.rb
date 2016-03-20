@@ -72,7 +72,6 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
 
   public
   def register
-    warn "[DEPRECATION] This gem has been renamed to logstash-filter-lookup and will no longer be supported. Please switch to logstash-filter-lookup as soon as possible."
     @my_map = {}
     @next_refresh = Time.now + @refresh_interval
     download_ws(@map_url, true)
