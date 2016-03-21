@@ -2,9 +2,6 @@
 
 New lookup plugin for dynamic lookup enrichment from multiple types of sources. There are a few different filters out there today that conduct different types of lookups, which may make sense being encapsulated within one lookup filter.
 
-This is a plugin for [Logstash](https://github.com/elastic/logstash).
-
-It is fully free and fully open source. The license is Apache 2.0, meaning you are pretty much free to use it however you want in whatever way.
 
 ## Example
 ### 1. Web Service Example
