@@ -29,6 +29,12 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # If this field is an array, only the first value will be used.
   config :field, :validate => :string, :required => true
 
+  # Can be webservice or file
+  config :type, :validate => :string, :default => 'webservice'
+
+  # path of a file
+  config :path, :validate => :string
+
   # If the destination (or target) field already exists, this configuration item specifies
   # whether the filter should skip mapping (default) or overwrite the target field
   # value with the new mapping value.
@@ -39,7 +45,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # http://localhost:8080/geoPoints/json
   # http://localhost:8080/geoPoints/csv
   # If no suffix matches, defaults to YAML
-  config :url, :validate => :string, :required => true
+  config :url, :validate => :string
 
   # When using a map file or url, this setting will indicate how frequently
   # (in seconds) logstash will check the YAML file or url for updates.
@@ -72,7 +78,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   def register
     @my_map = {}
     @next_refresh = Time.now + @refresh_interval
-    download_ws(url, true)
+    load(true)
     @logger.debug? and @logger.debug("#{self.class.name}: map - ", :map => get_map)
     type = 'Exact'
     @logger.debug? and @logger.debug("#{self.class.name}: map mapping method - "+type)
@@ -97,7 +103,6 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   end
 
   def load_data(registering, extension, data)
-
     begin
       if extension.eql?('.json')
         return json_loader(data)
@@ -123,26 +128,55 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     '.yml'
   end
 
-  public
-  def download_ws(path, registering=false)
-    extension = get_extension(path)
-    temp_extension = '_temp'+extension;
-    file_name = Digest::SHA1.hexdigest path
-    data = ''
+  def load(registering=false)
     begin
-      open(path, 'rb') do |read_file|
-        data +=read_file.read
+      if @type=='webservice'
+        extension = get_extension(@url)
+        data = load_webservice(@url, registering)
+      elsif @type=='file'
+        extension = get_extension(@path)
+        data = load_file(@path,registering)
       end
     rescue Exception => _
       if registering
-        raise "#{self.class.name}: Failed to initialize with #{file_name} and path #{path}"
+        raise "#{self.class.name}: Failed to initialize with type #{type}"
       end
-      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :map_path => file_name, :path => path)
+      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :type => @type)
     end
-
     begin
       load_data(registering, extension, data)
     rescue Exception => _
+      @logger.error("#{self.class.name}: Something happened with URL. Continuing with old map", :type => extension , :data => data);
+    end
+  end
+
+  def load_file(file,registering=false)
+    begin
+      data = ''
+      File.open(file, 'rb') do |read_file|
+        data +=read_file.read
+      end
+      return data
+    rescue Exception => _
+      if registering
+        raise "#{self.class.name}: Failed to initialize with path #{path}"
+      end
+      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :path => path)
+    end
+  end
+
+  def load_webservice(path, registering=false)
+    begin
+      data = ''
+      open(path, 'rb') do |read_file|
+        data +=read_file.read
+      end
+      return data
+    rescue Exception => _
+      if registering
+        raise "#{self.class.name}: Failed to initialize with path #{path}"
+      end
+      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :path => path)
     end
   end
 
@@ -151,7 +185,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   public
   def filter(event)
     if @next_refresh < Time.now
-      download_ws(@url)
+      load()
       @next_refresh = Time.now + @refresh_interval
       @logger.info('downloading and refreshing map file')
     end
