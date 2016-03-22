@@ -10,6 +10,34 @@ describe LogStash::Filters::LookUp do
   let(:config) { Hash.new }
   subject { described_class.new(config) }
 
+  describe "file mapping" do
+    config <<-CONFIG
+      filter {
+          lookup {
+              field       => "status"
+              destination => "mapping"
+              type => "file"
+              path  => "filename"
+          }
+      }
+    CONFIG
+    content = "\
+                        '200': OK\n\
+                        '300': Redirect\n\
+                        '400': Client Error\n\
+                        '500': Server Error"
+    filename = 'filename'
+
+    RSpec.configure do |config|
+      config.before(:each) do
+        allow(File).to receive(:open).with(filename, 'rb').and_yield( StringIO.new(content) )
+      end
+    end
+    sample("status" => "200") do
+      insist { subject["mapping"] } == "OK"
+    end
+  end
+
   describe "webserver mapping" do
     config <<-CONFIG
       filter {

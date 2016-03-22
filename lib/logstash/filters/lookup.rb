@@ -156,6 +156,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
       File.open(file, 'rb') do |read_file|
         data +=read_file.read
       end
+
       return data
     rescue Exception => _
       if registering
