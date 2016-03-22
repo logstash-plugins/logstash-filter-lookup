@@ -37,7 +37,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # http://localhost:8080/geoPoints/json
   # http://localhost:8080/geoPoints/csv
   # If no suffix matches, defaults to YAML
-  config :map_url, :validate => :string, :required => true
+  config :url, :validate => :string, :required => true
 
   # When using a map file or url, this setting will indicate how frequently
   # (in seconds) logstash will check the YAML file or url for updates.
@@ -66,15 +66,11 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     @my_map
   end
 
-  def set_map(map)
-    @my_map = map;
-  end
-
   public
   def register
     @my_map = {}
     @next_refresh = Time.now + @refresh_interval
-    download_ws(@map_url, true)
+    download_ws(url, true)
     @logger.debug? and @logger.debug("#{self.class.name}: map - ", :map => get_map)
     type = 'Exact'
     @logger.debug? and @logger.debug("#{self.class.name}: map mapping method - "+type)
@@ -155,7 +151,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   public
   def filter(event)
     if @next_refresh < Time.now
-      download_ws(@map_url)
+      download_ws(@url)
       @next_refresh = Time.now + @refresh_interval
       @logger.info('downloading and refreshing map file')
     end

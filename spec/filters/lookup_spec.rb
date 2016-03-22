@@ -16,7 +16,7 @@ describe LogStash::Filters::LookUp do
           lookup {
               field       => "status"
               destination => "mapping"
-              map_url  => "http://dummyurl/"
+              url  => "http://dummyurl/"
           }
       }
       CONFIG
@@ -49,7 +49,7 @@ describe LogStash::Filters::LookUp do
           lookup {
               field       => "status"
               destination => "mapping"
-              map_url  => "http://dummyurl/"
+              url  => "http://dummyurl/"
           }
       }
       CONFIG
@@ -87,7 +87,7 @@ describe LogStash::Filters::LookUp do
           lookup {
               field       => "status"
               destination => "mapping"
-              map_url  => "http://dummyurl/"
+              url  => "http://dummyurl/"
           }
       }
       CONFIG
@@ -120,7 +120,7 @@ describe LogStash::Filters::LookUp do
           "field"       => "status",
           "destination" => "mapping",
           "fallback" => "%{missing_mapping}",
-          "map_url"  => "http://dummyurl/"
+          "url"  => "http://dummyurl/"
         }
       end
 
