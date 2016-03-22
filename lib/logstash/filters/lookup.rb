@@ -5,6 +5,8 @@ require 'open-uri'
 require 'digest/sha1'
 require 'json'
 require 'csv'
+require 'rest_client'
+
 
 # A general search and replace tool which uses a Web service with a YAML, CSV or JSON response to determine replacement values.
 #
@@ -79,11 +81,11 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # def register
 
   def json_loader(data)
-    get_map.merge!(JSON.parse(File.read(data)))
+    get_map.merge!(JSON.parse(data))
   end
 
   def csv_loader(data)
-    data = CSV.read(data).inject(Hash.new) do |acc, v|
+    data = CSV.parse(data).inject(Hash.new) do |acc, v|
       acc[v[0]] = v[1]
       acc
     end
@@ -91,14 +93,15 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   end
 
   def yml_loader(data)
-    get_map.merge!(YAML.load_file(data))
+    get_map.merge!(YAML.load(data))
   end
 
-  def load_file(registering, extension, data)
+  def load_data(registering, extension, data)
+
     begin
-      if extension.equal?('.json')
+      if extension.eql?('.json')
         return json_loader(data)
-      elsif extension.end_with?('.csv')
+      elsif extension.eql?('.csv')
         return csv_loader(data)
       end
       yml_loader(data)
@@ -125,11 +128,10 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     extension = get_extension(path)
     temp_extension = '_temp'+extension;
     file_name = Digest::SHA1.hexdigest path
+    data = ''
     begin
-      File.open(file_name+temp_extension, 'wb') do |saved_file|
-        open(path, 'rb') do |read_file|
-          saved_file.write(read_file.read)
-        end
+      open(path, 'rb') do |read_file|
+        data +=read_file.read
       end
     rescue Exception => _
       if registering
@@ -139,10 +141,8 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     end
 
     begin
-      load_file(registering, extension, file_name+temp_extension)
-      FileUtils.mv(file_name+temp_extension, file_name+extension)
+      load_data(registering, extension, data)
     rescue Exception => _
-      FileUtils.rm_f(file_name+temp_extension)
     end
   end
 
