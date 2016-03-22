@@ -94,7 +94,7 @@ describe LogStash::Filters::LookUp do
     end
   end
 
-  describe "webserver mapping not valid" do
+  describe "webserver mapping not valid on register" do
     config <<-CONFIG
       filter {
           lookup {
@@ -118,7 +118,7 @@ describe LogStash::Filters::LookUp do
     end
 
     sample("status" => "200") do
-      insist { subject["mapping"] } == nil
+      expect { subject }.to raise_error
     end
   end
 
@@ -180,7 +180,7 @@ describe LogStash::Filters::LookUp do
     end
   end
 
-  describe "webserver mapping not valid JSON" do
+  describe "webserver mapping not valid JSON on register" do
     config <<-CONFIG
       filter {
           lookup {
@@ -205,7 +205,7 @@ describe LogStash::Filters::LookUp do
     end
 
     sample("status" => "200") do
-      insist { subject["mapping"] } == nil
+      expect { subject }.to raise_error
     end
   end
 
@@ -299,11 +299,22 @@ describe LogStash::Filters::LookUp do
           "field" => "status",
           "destination" => "mapping",
           "fallback" => "%{missing_mapping}",
-          "url" => "http://dummyurl/"
+          "type" => "file",
+          "path"=>"filename"
       }
     end
-
-    let(:event) { LogStash::Event.new("status" => "200", "missing_mapping" => "missing no match") }
+    content = "\
+                        '200': OK\n\
+                        '300': Redirect\n\
+                        '400': Client Error\n\
+                        '500': Server Error"
+    filename = 'filename'
+    RSpec.configure do |config|
+      config.before(:each) do
+        allow(File).to receive(:open).with(filename, 'r').and_yield( StringIO.new(content) )
+      end
+    end
+    let(:event) { LogStash::Event.new("status" => "250", "missing_mapping" => "missing no match") }
 
     it "return the exact mapping" do
       subject.register

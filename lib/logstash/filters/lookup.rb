@@ -112,9 +112,9 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
       yml_loader(data)
     rescue Exception => _
       if registering
-        raise "#{self.class.name}: Bad Syntax in map file #{file_name}"
+        raise "#{self.class.name}: Bad Syntax in data #{data}"
       else
-        @logger.warn("#{self.class.name}: Bad Syntax in map file, continuing with old map", :map_path => file_name)
+        @logger.warn("#{self.class.name}: Bad Syntax in map file, continuing with old map", :map_path => data)
       end
     end
   end
@@ -138,16 +138,12 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
         data = get_file_content(route)
       end
       extension = get_extension(route)
+      load_data(registering, extension, data)
     rescue Exception => _
       if registering
         raise "#{self.class.name}: Failed to initialize with type #{type} and route #{route}"
       end
-      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :type => @type)
-    end
-    begin
-      load_data(registering, extension, data)
-    rescue Exception => _
-      @logger.error("#{self.class.name}: Something happened with URL. Continuing with old map", :type => extension, :data => data);
+      @logger.warn("#{self.class.name}: Something happened with load. Continuing with old map", :type => @type, :route => route)
     end
   end
 
