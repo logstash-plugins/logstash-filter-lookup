@@ -153,7 +153,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   def load_file(file,registering=false)
     begin
       data = ''
-      File.open(file, 'rb') do |read_file|
+      File.open(file, 'r') do |read_file|
         data +=read_file.read
       end
 

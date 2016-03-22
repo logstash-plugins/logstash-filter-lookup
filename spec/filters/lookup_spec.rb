@@ -30,7 +30,7 @@ describe LogStash::Filters::LookUp do
 
     RSpec.configure do |config|
       config.before(:each) do
-        allow(File).to receive(:open).with(filename, 'rb').and_yield( StringIO.new(content) )
+        allow(File).to receive(:open).with(filename, 'r').and_yield( StringIO.new(content) )
       end
     end
     sample("status" => "200") do
