@@ -131,57 +131,47 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   def load(registering=false)
     begin
       if @type=='webservice'
-        extension = get_extension(@url)
-        data = load_webservice(@url, registering)
+        route = @url
+        data = get_webservice_content(route)
       elsif @type=='file'
-        extension = get_extension(@path)
-        data = load_file(@path,registering)
+        route = @path
+        data = get_file_content(route)
       end
+      extension = get_extension(route)
     rescue Exception => _
       if registering
-        raise "#{self.class.name}: Failed to initialize with type #{type}"
+        raise "#{self.class.name}: Failed to initialize with type #{type} and route #{route}"
       end
       @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :type => @type)
     end
     begin
       load_data(registering, extension, data)
     rescue Exception => _
-      @logger.error("#{self.class.name}: Something happened with URL. Continuing with old map", :type => extension , :data => data);
+      @logger.error("#{self.class.name}: Something happened with URL. Continuing with old map", :type => extension, :data => data);
     end
   end
 
-  def load_file(file,registering=false)
-    begin
-      data = ''
-      File.open(file, 'r') do |read_file|
-        data +=read_file.read
-      end
+  # def load
 
-      return data
-    rescue Exception => _
-      if registering
-        raise "#{self.class.name}: Failed to initialize with path #{path}"
-      end
-      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :path => path)
+  def get_file_content(file)
+    data = ''
+    File.open(file, 'r') do |read_file|
+      data +=read_file.read
     end
+    data
   end
 
-  def load_webservice(path, registering=false)
-    begin
-      data = ''
-      open(path, 'rb') do |read_file|
-        data +=read_file.read
-      end
-      return data
-    rescue Exception => _
-      if registering
-        raise "#{self.class.name}: Failed to initialize with path #{path}"
-      end
-      @logger.warn("#{self.class.name}: Something happened with URL. Continuing with old map", :path => path)
+  # def get_file_content
+
+  def get_webservice_content(path)
+    data = ''
+    open(path, 'rb') do |read_file|
+      data +=read_file.read
     end
+    data
   end
 
-  # def download_yaml
+  # def get_webservice_content
 
   public
   def filter(event)
