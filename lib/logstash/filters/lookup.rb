@@ -2,7 +2,6 @@
 require 'logstash/filters/base'
 require 'logstash/namespace'
 require 'open-uri'
-require 'digest/sha1'
 require 'json'
 require 'csv'
 require 'rest_client'
@@ -183,7 +182,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
           end
         end
       }
-      filter_matched(event) if matched and event['lookup_result'].length == @fields.length
+      filter_matched(event) if matched and result.length == @fields.length
     rescue Exception => e
       @logger.error('Something went wrong when attempting to map from my_map', :exception => e, :field => @fields, :event => event)
     end

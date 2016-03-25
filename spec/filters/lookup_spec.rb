@@ -2,7 +2,6 @@
 require "logstash/devutils/rspec/spec_helper"
 require "logstash/filters/lookup"
 require "webmock/rspec"
-require 'digest/sha1'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 describe LogStash::Filters::LookUp do
