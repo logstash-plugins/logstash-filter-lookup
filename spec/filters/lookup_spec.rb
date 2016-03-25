@@ -41,6 +41,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "yml"
               url  => "http://dummyurl/"
           }
       }
@@ -48,8 +49,7 @@ describe LogStash::Filters::LookUp do
 
     RSpec.configure do |config|
       config.before(:each) do
-        stub_request(:get, "http://dummyurl/").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
+        stub_request(:any, "http://dummyurl/").
             to_return(:status => 200, :body => "\
                         '200': OK\n\
                         '300': Redirect\n\
@@ -68,6 +68,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "yml"
               url  => "http://dummyurl/"
           }
       }
@@ -76,7 +77,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => "\
                         '200': OK\n\
                         '300': Redirect\n\
@@ -95,6 +95,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "yml"
               url  => "http://dummyurl/"
           }
       }
@@ -103,7 +104,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => "\
                         '200': OK\n\
                         '300': Redirect\n\
@@ -122,6 +122,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "json"
               url  => "http://dummyurl/json"
           }
       }
@@ -130,7 +131,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/json").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => '{
 	"200": "OK",
 	"300": "Redirect",
@@ -150,6 +150,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "json"
               url  => "http://dummyurl/json"
           }
       }
@@ -158,7 +159,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/json").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => '{
 	"200": "OK",
 	"300": "Redirect",
@@ -178,6 +178,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "json"
               url  => "http://dummyurl/json"
           }
       }
@@ -186,7 +187,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/json").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => '{
 	"200": "OK",
 	"300": "Redirect",
@@ -206,6 +206,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "csv"
               url  => "http://dummyurl/csv"
           }
       }
@@ -214,7 +215,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/csv").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => "200,OK
 300,Redirect
 400,Client Error
@@ -233,6 +233,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "csv"
               url  => "http://dummyurl/csv"
           }
       }
@@ -241,7 +242,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/csv").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => "200,OK
 300,Redirect
 400,Client Error
@@ -260,6 +260,7 @@ describe LogStash::Filters::LookUp do
       filter {
           lookup {
               fields       => ["status"]
+              format => "csv"
               url  => "http://dummyurl/csv"
           }
       }
@@ -268,7 +269,6 @@ describe LogStash::Filters::LookUp do
     RSpec.configure do |config|
       config.before(:each) do
         stub_request(:get, "http://dummyurl/csv").
-            with(:headers => {'Accept' => '*/*', 'User-Agent' => 'Ruby'}).
             to_return(:status => 200, :body => "200OK
 300,Redirect
 400,Client Error

@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'logstash/filters/base'
 require 'logstash/namespace'
-require 'open-uri'
 require 'json'
 require 'csv'
 require 'rest_client'
@@ -35,12 +34,25 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # Path of a file
   config :path, :validate => :string
 
+  config :format, :validate => :string, :default => 'yml'
+
+  config :headers, :validate => :hash, :default => {  }
+  config :params, :validate => :hash, :default => {  }
+
+  #default field where store results if override option is false
+  config :result_key, :validate => :string, :default => "lookup_result"
+
   # The full URI path of a Web service who generates an JSON, yml or CSV format response.
   # requires to append as suffix the format type. Ex: http://localhost:8080/geoPoints?type=json
   # http://localhost:8080/geoPoints/json
   # http://localhost:8080/geoPoints/csv
   # If no suffix matches, defaults to YAML
   config :url, :validate => :string
+
+  #HTTP method
+  config :method, :validate => :string, :default => "get"
+
+
 
   # When using a map file or url, this setting will indicate how frequently
   # (in seconds) logstash will check the YAML file or url for updates.
@@ -86,11 +98,11 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     fill_map(YAML.load(data))
   end
 
-  def load_data(registering, extension, data)
+  def load_data(registering, data)
     begin
-      if extension.eql?('.json')
+      if @format.eql?('json')
         return json_loader(data)
-      elsif extension.eql?('.csv')
+      elsif @format.eql?('csv')
         return csv_loader(data)
       end
       yml_loader(data)
@@ -103,15 +115,6 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
     end
   end
 
-  def get_extension(path)
-    if path.end_with?('json')
-      return '.json'
-    elsif path.end_with?('csv')
-      return '.csv'
-    end
-    '.yml'
-  end
-
   def load(registering=false)
     begin
       if @type=='webservice'
@@ -121,8 +124,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
         route = @path
         data = get_file_content(route)
       end
-      extension = get_extension(route)
-      load_data(registering, extension, data)
+      load_data(registering, data)
     rescue Exception => _
       if registering
         raise "#{self.class.name}: Failed to initialize with type #{type} and route #{route}"
@@ -144,14 +146,20 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # def get_file_content
 
   def get_webservice_content(path)
-    data = ''
-    open(path, 'rb') do |read_file|
-      data +=read_file.read
+    case @method
+      when "get"
+        data = RestClient.get sprint(path), sprint(@headers)
+      when "post"
+        data = RestClient.post sprint(path), sprint(@params), sprint(@headers)
     end
     data
   end
 
   # def get_webservice_content
+
+  def sprint(hash)
+    hash
+  end
 
   public
   def filter(event)
@@ -165,8 +173,8 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
       if @override
         result = event;
       else
-        event['lookup_result'] = {}
-        result = event['lookup_result']
+        event[@result_key] = {}
+        result = event[@result_key]
       end
       @fields.each { |key|
         key_string = key.to_s
