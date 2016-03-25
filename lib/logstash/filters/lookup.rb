@@ -16,10 +16,7 @@ require 'rest_client'
 # matches the EXACT contents of a map entry key, the field's value will be substituted
 # with the matched key's value from the map.
 #
-# By default, the lookup filter will replace the contents of the
-# maching event field (in-place). However, by using the `destination`
-# configuration item, you may also specify a target event field to
-# populate with the new mapd value.
+# The lookup filter will put the contents of the maching event fields into field result.
 
 class LogStash::Filters::LookUp < LogStash::Filters::Base
   config_name "lookup"
@@ -27,18 +24,17 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # match by the map filter (e.g. `message`, `host`, `response_code`). 
   # 
   # If this field is an array, only the first value will be used.
-  config :field, :validate => :string, :required => true
+  config :fields, :validate => :array, :required => true
+
+  # By default false, if false, then all the result will be stored into a field called lookup_result
+  # If true, the same field used to lookup, will be replaced.
+  config :override, :validate => :boolean, :default => false
 
   # Can be webservice or file
   config :type, :validate => :string, :default => 'webservice'
 
-  # path of a file
+  # Path of a file
   config :path, :validate => :string
-
-  # If the destination (or target) field already exists, this configuration item specifies
-  # whether the filter should skip mapping (default) or overwrite the target field
-  # value with the new mapping value.
-  config :override, :validate => :boolean, :default => false
 
   # The full URI path of a Web service who generates an JSON, yml or CSV format response.
   # requires to append as suffix the format type. Ex: http://localhost:8080/geoPoints?type=json
@@ -51,27 +47,16 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # (in seconds) logstash will check the YAML file or url for updates.
   config :refresh_interval, :validate => :number, :default => 300
 
-  # The destination field you wish to populate with the mapd code. The default
-  # is a field named `mapping`. Set this to the same value as source if you want
-  # to do a substitution, in this case filter will allways succeed. This will clobber
-  # the old value of the source field! 
-  config :destination, :validate => :string, :default => "mapping"
-
   # In case no mapping occurs in the event (no matches), this will add a default
   # mapping string, which will always populate `field`, if the match failed.
-  #
-  # For example, if we have configured `fallback => "no match"`, using this map:
-  # [source,ruby]
-  #     foo: bar
-  #
-  # Then, if logstash received an event with the field `foo` set to `bar`, the destination
-  # field would be set to `bar`. However, if logstash received an event with `foo` set to `nope`,
-  # then the destination field would still be populated, but with the value of `no match`.
-  # This configuration can be dynamic and include parts of the event using the `%{field}` syntax.
-  config :fallback, :validate => :string
+  config :default_values, :validate => :array, :default => {}
 
   def get_map
     @my_map
+  end
+
+  def fill_map(data)
+    get_map.merge!(data)
   end
 
   public
@@ -87,7 +72,7 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
   # def register
 
   def json_loader(data)
-    get_map.merge!(JSON.parse(data))
+    fill_map(JSON.parse(data))
   end
 
   def csv_loader(data)
@@ -95,11 +80,11 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
       acc[v[0]] = v[1]
       acc
     end
-    get_map.merge!(data)
+    fill_map(data)
   end
 
   def yml_loader(data)
-    get_map.merge!(YAML.load(data))
+    fill_map(YAML.load(data))
   end
 
   def load_data(registering, extension, data)
@@ -176,25 +161,31 @@ class LogStash::Filters::LookUp < LogStash::Filters::Base
       @next_refresh = Time.now + @refresh_interval
       @logger.info('downloading and refreshing map file')
     end
-
-    return unless event.include?(@field) # Skip mapping in case event does not have @event field.
-    return if event.include?(@destination) and not @override # Skip mapping in case @destination field already exists and @override is disabled.
-
     begin
-      source = event[@field].is_a?(Array) ? event[@field].first.to_s : event[@field].to_s
-      matched = false
-      if get_map.include?(source)
-        event[@destination] = get_map[source]
-        matched = true
+      matched = true
+      if @override
+        result = event;
+      else
+        event['lookup_result'] = {}
+        result = event['lookup_result']
       end
-
-      if not matched and @fallback
-        event[@destination] = event.sprintf(@fallback)
-        matched = true
-      end
-      filter_matched(event) if matched or @field == @destination
+      @fields.each { |key|
+        key_string = key.to_s
+        if event.include?(key_string)
+          val_string = event[key_string]
+          if get_map.include?(val_string)
+            result[key_string] = get_map[val_string]
+          else
+            if @default_values and @default_values.include?(key_string)
+              result[key_string] = event.sprintf(@default_values[key_string])
+            end
+            matched = false
+          end
+        end
+      }
+      filter_matched(event) if matched and event['lookup_result'].length == @fields.length
     rescue Exception => e
-      @logger.error('Something went wrong when attempting to map from my_map', :exception => e, :field => @field, :event => event)
+      @logger.error('Something went wrong when attempting to map from my_map', :exception => e, :field => @fields, :event => event)
     end
   end # def filter
 end # class LogStash::Filters::LookUp

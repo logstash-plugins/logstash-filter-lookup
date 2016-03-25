@@ -14,8 +14,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               type => "file"
               path  => "filename"
           }
@@ -33,8 +32,8 @@ describe LogStash::Filters::LookUp do
         allow(File).to receive(:open).with(filename, 'r').and_yield( StringIO.new(content) )
       end
     end
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -42,8 +41,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/"
           }
       }
@@ -61,8 +59,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -70,8 +68,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/"
           }
       }
@@ -89,8 +86,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -98,8 +95,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/"
           }
       }
@@ -117,7 +113,7 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
+    sample({"status" => "200"}) do
       expect { subject }.to raise_error
     end
   end
@@ -126,8 +122,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/json"
           }
       }
@@ -146,8 +141,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -155,8 +150,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/json"
           }
       }
@@ -175,8 +169,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -184,8 +178,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/json"
           }
       }
@@ -204,7 +197,7 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
+    sample({"status" => "200"}) do
       expect { subject }.to raise_error
     end
   end
@@ -213,8 +206,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/csv"
           }
       }
@@ -232,8 +224,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -241,8 +233,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/csv"
           }
       }
@@ -260,8 +251,8 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == "OK"
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == "OK"
     end
   end
 
@@ -269,8 +260,7 @@ describe LogStash::Filters::LookUp do
     config <<-CONFIG
       filter {
           lookup {
-              field       => "status"
-              destination => "mapping"
+              fields       => ["status"]
               url  => "http://dummyurl/csv"
           }
       }
@@ -288,17 +278,16 @@ describe LogStash::Filters::LookUp do
       end
     end
 
-    sample("status" => "200") do
-      insist { subject["mapping"] } == nil
+    sample({"status" => "200"}) do
+      insist { subject["lookup_result"]["status"] } == nil
     end
   end
 
   context "allow sprintf" do
     let(:config) do
       {
-          "field" => "status",
-          "destination" => "mapping",
-          "fallback" => "%{missing_mapping}",
+          "fields" => ["status"],
+          "default_values" => {"status"=>"%{missing_mapping}"},
           "type" => "file",
           "path"=>"filename"
       }
@@ -319,7 +308,7 @@ describe LogStash::Filters::LookUp do
     it "return the exact mapping" do
       subject.register
       subject.filter(event)
-      expect(event["mapping"]).to eq("missing no match")
+      expect(event["lookup_result"]["status"]).to eq("missing no match")
     end
   end
 end
